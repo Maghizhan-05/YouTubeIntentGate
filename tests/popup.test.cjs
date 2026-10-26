@@ -1,0 +1,24 @@
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const { JSDOM } = require('jsdom');
+const src = path.join(__dirname, '..', 'extension-src');
+test('popup reads local mode, exposes four semantic radio controls, and writes only mode', async () => {
+  const html = fs.readFileSync(path.join(src, 'popup/popup.html'), 'utf8');
+  const dom = new JSDOM(html, { url: 'https://extension.test/', runScripts: 'outside-only' });
+  let written;
+  dom.window.chrome = { runtime: { getURL: name => name }, storage: { local: { get: async () => ({ mode: 'no-doomscroll' }), set: async value => { written = value; } } } };
+  dom.window.eval(fs.readFileSync(path.join(src, 'lib/storage.js'), 'utf8'));
+  dom.window.eval(fs.readFileSync(path.join(src, 'popup/popup.js'), 'utf8'));
+  await new Promise(resolve => setTimeout(resolve, 20));
+  const radios = [...dom.window.document.querySelectorAll('input[type="radio"][name="mode"]')];
+  assert.deepEqual(radios.map(node => node.value), ['off', 'intention', 'no-doomscroll', 'watch-later']);
+  assert.equal(radios.find(node => node.checked).value, 'no-doomscroll');
+  const watch = radios.find(node => node.value === 'watch-later');
+  watch.checked = true; watch.dispatchEvent(new dom.window.Event('change', { bubbles: true }));
+  await new Promise(resolve => setTimeout(resolve, 20));
+  assert.equal(written.mode, 'watch-later');
+  assert.deepEqual(Object.keys(written), ['mode']);
+  dom.window.close();
+});

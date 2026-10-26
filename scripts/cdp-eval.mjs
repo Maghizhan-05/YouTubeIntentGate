@@ -1,0 +1,10 @@
+const port = process.env.CDP_PORT || '9230';
+const [prefix, expression] = process.argv.slice(2);
+if (!prefix || !expression) throw new Error('Usage: node scripts/cdp-eval.mjs URL_PREFIX JS_EXPRESSION');
+const pages = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json();
+const target = pages.find(page => page.url.startsWith(prefix) && page.type === 'page');
+if (!target) throw new Error(`No page matches ${prefix}`);
+const socket = new WebSocket(target.webSocketDebuggerUrl);
+await new Promise((resolve, reject) => { socket.onopen = resolve; socket.onerror = reject; });
+socket.onmessage = ({ data }) => { const result = JSON.parse(data); if (result.id === 1) { console.log(JSON.stringify(result.result?.result?.value ?? result.error ?? result.result?.result?.description)); socket.close(); } };
+socket.send(JSON.stringify({ id: 1, method: 'Runtime.evaluate', params: { expression, awaitPromise: true, returnByValue: true } }));

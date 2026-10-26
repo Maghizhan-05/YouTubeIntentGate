@@ -1,0 +1,13 @@
+<section class="gate" role="dialog" aria-modal="true" aria-labelledby="gate-heading">
+  <header class="brand"><img data-intent-icon alt="" width="42" height="42"><div><strong>Intent Gate</strong><small>Make the next click count</small></div></header>
+  <h1 id="gate-heading">What did you come here to watch?</h1>
+  <p class="lead">Name what you came for. We’ll take you straight to the results.</p>
+  <form novalidate>
+    <label for="intent-input">Your intention</label>
+    <textarea id="intent-input" rows="1" placeholder="e.g. Learn how to make pour-over coffee" aria-describedby="intent-hint intent-error" autofocus></textarea>
+    <p id="intent-error" role="alert" hidden>Enter a topic before searching.</p>
+    <p id="intent-hint">A few words are enough. Your intention isn’t saved.</p>
+    <button type="submit">Search with intention <span aria-hidden="true">→</span></button>
+  </form>
+  <footer><span class="mode"><i aria-hidden="true"></i>Intention Gate is on</span><span>Change mode in the toolbar</span></footer>
+</section>

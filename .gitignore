@@ -1,0 +1,6 @@
+node_modules/
+safari/DerivedData/
+**/xcuserdata/
+.DS_Store
+*.xcresult
+*.log
